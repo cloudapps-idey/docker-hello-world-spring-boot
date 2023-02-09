@@ -1,6 +1,8 @@
 # Maven build container 
 
-FROM maven:3.8.5-openjdk-11 AS maven_build
+#FROM maven:3.8.5-openjdk-11 AS maven_build
+
+FROM registry.redhat.io/fuse7/fuse-java-openshift-rhel8:1.11
 
 COPY pom.xml /tmp/
 
