@@ -2,7 +2,7 @@
 
 #FROM maven:3.8.5-openjdk-11 AS maven_build
 
-FROM registry.redhat.io/fuse7/fuse-java-openshift-rhel8:1.11
+FROM fuse7/fuse-java-openshift-jdk11-rhel8:1.11-46
 
 COPY pom.xml /tmp/
 
@@ -12,12 +12,9 @@ WORKDIR /tmp/
 
 RUN mvn package
 
-#pull base image
-
-FROM eclipse-temurin:11
 
 #maintainer 
-MAINTAINER dstar55@yahoo.com
+MAINTAINER idey@yahoo.com
 #expose port 8080
 EXPOSE 8080
 
