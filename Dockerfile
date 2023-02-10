@@ -2,7 +2,7 @@
 
 #FROM maven:3.8.5-openjdk-11 AS maven_build
 
-FROM fuse7/fuse-java-openshift-jdk11-rhel8:1.11-46
+FROM registry.redhat.io/fuse7/fuse-java-openshift-jdk11-rhel8:1.11-46
 
 COPY pom.xml /tmp/
 
