@@ -1,26 +1,14 @@
-# Maven build container 
+ 
+FROM registry.redhat.io/fuse7/fuse-java-openshift-rhel8:1.11
 
-#FROM maven:3.8.5-openjdk-11 AS maven_build
+LABEL src https://github.com/cloudapps-idey/docker-hello-world-spring-boot.git
 
-FROM registry.redhat.io/fuse7/fuse-java-openshift-jdk11-rhel8:1.11-46
+# Source
+COPY ./ /tmp/src/
+USER root
+RUN chmod -R "g=u" /tmp/src
 
-COPY pom.xml /tmp/
-
-COPY src /tmp/src/
-
-WORKDIR /tmp/
-
-RUN mvn package
-
-
-#maintainer 
-MAINTAINER idey@yahoo.com
-#expose port 8080
-EXPOSE 8080
-
-#default command
-CMD java -jar /data/hello-world-0.1.0.jar
-
-#copy hello world to docker image from builder image
-
-COPY --from=maven_build /tmp/target/hello-world-0.1.0.jar /data/hello-world-0.1.0.jar
+# Maven build
+USER 185
+RUN /usr/local/s2i/assemble
+RUN rm -rf /tmp/src/target
