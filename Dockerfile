@@ -47,18 +47,7 @@ RUN microdnf --noplugins install -y unzip && microdnf --noplugins clean all
 RUN echo securerandom.source=file:/dev/urandom >> /usr/lib/jvm/java/jre/lib/security/java.security \
  && usermod -g root -G jboss jboss
 
-# Prometheus JMX exporter agent
-COPY "artifacts/io/prometheus/jmx/jmx_prometheus_javaagent/${PROMETHEUS_JMX_EXPORTER_VERSION}/jmx_prometheus_javaagent-${PROMETHEUS_JMX_EXPORTER_VERSION}.jar" /opt/prometheus/jmx_prometheus_javaagent.jar
-RUN mkdir -p /opt/prometheus/etc
-COPY prometheus-opts /opt/prometheus/prometheus-opts
-COPY prometheus-config.yml /opt/prometheus/prometheus-config.yml
-RUN chmod 444 /opt/prometheus/jmx_prometheus_javaagent.jar \
-&& chmod 444 /opt/prometheus/prometheus-config.yml \
-&& chmod 755 /opt/prometheus/prometheus-opts \
-&& chmod 775 /opt/prometheus/etc \
-&& chgrp root /opt/prometheus/etc
 
-EXPOSE 9779
 
 # Jolokia agent
 RUN mkdir -p /opt/jolokia/etc
