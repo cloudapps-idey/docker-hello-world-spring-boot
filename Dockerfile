@@ -1,42 +1,36 @@
+ FROM registry.redhat.io/ubi8/openjdk-11
  
-FROM registry.redhat.io/ubi8/openjdk-11
-
-LABEL src https://github.com/cloudapps-idey/docker-hello-world-spring-boot.git
+ LABEL src https://github.com/cloudapps-idey/docker-hello-world-spring-boot.git
 
 # Source
 COPY ./ /tmp/src/
 USER root
 RUN chmod -R "g=u" /tmp/src
 
-
-ENV PROMETHEUS_JMX_EXPORTER_VERSION="0.3.1.redhat-00006" \
+ENV JAVA_IMAGE_NAME="ubi8/openjdk-11" \
+    JAVA_IMAGE_VERSION="1.11" \
+    JOLOKIA_VERSION="1.7.1.redhat-00001" \
+    PROMETHEUS_JMX_EXPORTER_VERSION="0.3.1.redhat-00006" \
     PATH=$PATH:"/usr/local/s2i" \
     AB_JOLOKIA_PASSWORD_RANDOM="true" \
     AB_JOLOKIA_AUTH_OPENSHIFT="true" \
     JAVA_DATA_DIR="/deployments/data"
 
-# Some version information
-LABEL maintainer="Otavio Piske <opiske@redhat.com>" \
-      summary="Build and run Spring Boot-based integration applications" \
-      description="Build and run Spring Boot-based integration applications" \
-      io.fabric8.s2i.version.maven="3.3.3-1.el7" \
-      io.fabric8.s2i.version.jolokia="1.7.1.redhat-00001" \
-      io.fabric8.s2i.version.prometheus.jmx_exporter="0.3.1.redhat-00006" \
-      io.openshift.tags="builder,java" \
-      io.openshift.s2i.scripts-url="image:///usr/local/s2i" \
-      io.openshift.s2i.destination="/tmp" \
-      org.jboss.deployments-dir="/deployments" \
-      com.redhat.deployments-dir="/deployments" \
-      com.redhat.dev-mode="JAVA_DEBUG:false" \
-      com.redhat.dev-mode.port="JAVA_DEBUG_PORT:5005"
 
 # Temporary switch to root
 USER root
 
+# Install unzip via SCL
+RUN microdnf --noplugins install -y unzip && microdnf --noplugins clean all
+
+
+# Use /dev/urandom to speed up startups.
+RUN echo securerandom.source=file:/dev/urandom >> /usr/lib/jvm/java/jre/lib/security/java.security \
+ && usermod -g root -G jboss jboss
+
 # Jolokia agent
 RUN mkdir -p /opt/jolokia/etc
 COPY "artifacts/org/jolokia/jolokia-jvm/${JOLOKIA_VERSION}/jolokia-jvm-${JOLOKIA_VERSION}.jar" /opt/jolokia/jolokia.jar
-
 #COPY "jolokia-jvm-${JOLOKIA_VERSION}.jar" /opt/jolokia/jolokia.jar
 ADD jolokia-opts /opt/jolokia/jolokia-opts
 RUN chmod 444 /opt/jolokia/jolokia.jar \
@@ -45,6 +39,7 @@ RUN chmod 444 /opt/jolokia/jolokia.jar \
  && chgrp root /opt/jolokia/etc
 
 EXPOSE 8778
+
 
 # S2I scripts + README
 COPY s2i /usr/local/s2i
@@ -68,11 +63,11 @@ RUN mkdir -p /deployments/data \
  && chmod 664 /etc/passwd
 
 # S2I requires a numeric, non-0 UID. This is the UID for the jboss user in the base image
+
 USER 185
 RUN mkdir -p /home/jboss/.m2
 COPY settings.xml /home/jboss/.m2/settings.xml
 
-# Maven build
-USER 185
-RUN /usr/local/s2i/assemble
-RUN rm -rf /tmp/src/target
+# Use the run script as default since we are working as an hybrid image which can be
+# used directly to. (If we were a plain s2i image we would print the usage info here)
+CMD [ "/usr/local/s2i/run" ]
