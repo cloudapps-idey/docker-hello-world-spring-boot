@@ -1,4 +1,4 @@
- FROM registry.redhat.io/ubi8/openjdk-11
+ FROM registry.redhat.io/ubi8/openjdk-8
  
  LABEL src https://github.com/cloudapps-idey/docker-hello-world-spring-boot.git
 
