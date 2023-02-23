@@ -7,8 +7,8 @@ COPY ./ /tmp/src/
 USER root
 RUN chmod -R "g=u" /tmp/src
 
-ENV JAVA_IMAGE_NAME="ubi8/openjdk-11" \
-    JAVA_IMAGE_VERSION="1.11" \
+ENV FUSE_JAVA_IMAGE_NAME="fuse7/fuse-java-openshift-rhel8" \
+    FUSE_JAVA_IMAGE_VERSION="1.11" \
     JOLOKIA_VERSION="1.7.1.redhat-00001" \
     PROMETHEUS_JMX_EXPORTER_VERSION="0.3.1.redhat-00006" \
     PATH=$PATH:"/usr/local/s2i" \
@@ -16,6 +16,25 @@ ENV JAVA_IMAGE_NAME="ubi8/openjdk-11" \
     AB_JOLOKIA_AUTH_OPENSHIFT="true" \
     JAVA_DATA_DIR="/deployments/data"
 
+# Some version information
+LABEL name="$FUSE_JAVA_IMAGE_NAME" \
+      version="$FUSE_JAVA_IMAGE_VERSION" \
+      maintainer="Otavio Piske <opiske@redhat.com>" \
+      summary="Build and run Spring Boot-based integration applications" \
+      description="Build and run Spring Boot-based integration applications" \
+      com.redhat.component="fuse-java-openshift-rhel-8-container" \
+      io.fabric8.s2i.version.maven="3.3.3-1.el7" \
+      io.fabric8.s2i.version.jolokia="1.7.1.redhat-00001" \
+      io.fabric8.s2i.version.prometheus.jmx_exporter="0.3.1.redhat-00006" \
+      io.k8s.description="Build and run Spring Boot-based integration applications" \
+      io.k8s.display-name="Fuse for OpenShift" \
+      io.openshift.tags="builder,java,fuse" \
+      io.openshift.s2i.scripts-url="image:///usr/local/s2i" \
+      io.openshift.s2i.destination="/tmp" \
+      org.jboss.deployments-dir="/deployments" \
+      com.redhat.deployments-dir="/deployments" \
+      com.redhat.dev-mode="JAVA_DEBUG:false" \
+      com.redhat.dev-mode.port="JAVA_DEBUG_PORT:5005"
 
 # Temporary switch to root
 USER root
@@ -27,6 +46,19 @@ RUN microdnf --noplugins install -y unzip && microdnf --noplugins clean all
 # Use /dev/urandom to speed up startups.
 RUN echo securerandom.source=file:/dev/urandom >> /usr/lib/jvm/java/jre/lib/security/java.security \
  && usermod -g root -G jboss jboss
+
+# Prometheus JMX exporter agent
+COPY "artifacts/io/prometheus/jmx/jmx_prometheus_javaagent/${PROMETHEUS_JMX_EXPORTER_VERSION}/jmx_prometheus_javaagent-${PROMETHEUS_JMX_EXPORTER_VERSION}.jar" /opt/prometheus/jmx_prometheus_javaagent.jar
+RUN mkdir -p /opt/prometheus/etc
+COPY prometheus-opts /opt/prometheus/prometheus-opts
+COPY prometheus-config.yml /opt/prometheus/prometheus-config.yml
+RUN chmod 444 /opt/prometheus/jmx_prometheus_javaagent.jar \
+&& chmod 444 /opt/prometheus/prometheus-config.yml \
+&& chmod 755 /opt/prometheus/prometheus-opts \
+&& chmod 775 /opt/prometheus/etc \
+&& chgrp root /opt/prometheus/etc
+
+EXPOSE 9779
 
 # Jolokia agent
 RUN mkdir -p /opt/jolokia/etc
@@ -53,6 +85,13 @@ RUN chmod 755 /opt/run-java/run-java.sh
 # Adding run-env.sh to set app dir
 COPY run-env.sh /opt/run-java/run-env.sh
 RUN chmod 755 /opt/run-java/run-env.sh
+
+# Copy licenses
+RUN mkdir -p /opt/fuse/licenses
+COPY licenses.css /opt/fuse/licenses
+COPY licenses.xml /opt/fuse/licenses
+COPY licenses.html /opt/fuse/licenses
+COPY apache_software_license_version_2.0-apache-2.0.txt /opt/fuse/licenses
 
 # Necessary to permit running with a randomised UID
 RUN mkdir -p /deployments/data \
