@@ -26,7 +26,7 @@ LABEL name="$FUSE_JAVA_IMAGE_NAME" \
       org.jboss.deployments-dir="/deployments" \
       com.redhat.deployments-dir="/deployments" \
       com.redhat.dev-mode="JAVA_DEBUG:false" \
-      src=src https://github.com/cloudapps-idey/docker-hello-world-spring-boot.git \
+      src=https://github.com/cloudapps-idey/docker-hello-world-spring-boot.git \
       com.redhat.dev-mode.port="JAVA_DEBUG_PORT:5005"
 
 # Source
