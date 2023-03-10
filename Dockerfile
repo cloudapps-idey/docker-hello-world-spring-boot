@@ -61,6 +61,8 @@ RUN mkdir -p /deployments/data \
  && chmod -R "g+rwX" /home/jboss \
  && chown -R jboss:root /home/jboss \
  && chmod 664 /etc/passwd
+ 
+ RUN chmod -R "g=u" /tmp/src
 
 # S2I requires a numeric, non-0 UID. This is the UID for the jboss user in the base image
 
