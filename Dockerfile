@@ -10,12 +10,23 @@ COPY ./ /tmp/src/
 #USER root
 #RUN chmod -R "g=u" /tmp/src
 
+# Temporary switch to root
+USER root
 
+# Install unzip via SCL
+RUN microdnf --noplugins install -y unzip && microdnf --noplugins clean all
+
+
+# Use /dev/urandom to speed up startups & Add jboss user to the root group
+RUN echo securerandom.source=file:/dev/urandom >> /usr/lib/jvm/java/conf/security/java.security \
+ && usermod -g root -G jboss jboss
+ 
+ RUN chgrp -R 0 /tmp/src && \
+    chmod -R g=u /tmp/src
 
 # Maven build
 USER 185
-RUN chgrp -R 0 /tmp/src && \
-    chmod -R g=u /tmp/src
+
 
 RUN /usr/local/s2i/assemble
 RUN rm -rf /tmp/src/target
