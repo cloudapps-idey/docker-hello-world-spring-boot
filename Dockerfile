@@ -47,7 +47,7 @@ RUN echo securerandom.source=file:/dev/urandom >> /usr/lib/jvm/java/conf/securit
 # Jolokia agent
 RUN mkdir -p /opt/jolokia/etc
 COPY ./jolokia/jolokia.jar /opt/jolokia/jolokia.jar
-ADD ./jolokia-opts /opt/jolokia/jolokia-opts
+ADD ./jolokia/jolokia-opts /opt/jolokia/jolokia-opts
 RUN chmod 444 /opt/jolokia/jolokia.jar \
  && chmod 755 /opt/jolokia/jolokia-opts \
  && chmod 775 /opt/jolokia/etc \
