@@ -7,8 +7,8 @@ LABEL src https://github.com/cloudapps-idey/docker-hello-world-spring-boot.git
 # Source
 COPY ./ /tmp/src/
 
-USER root
-RUN chmod -R "g=u" /tmp/src
+#USER root
+#RUN chmod -R "g=u" /tmp/src
 
 # Maven build
 USER 185
