@@ -13,6 +13,6 @@ USER 185
 RUN /usr/local/s2i/assemble
 RUN rm -rf /tmp/src/target
 
-ADD jolokia-jvm-1.7.2 /opt/jolokia-jvm-1.7.2
+#ADD jolokia-jvm-1.7.2 /opt/jolokia-jvm-1.7.2
 
 #ENTRYPOINT exec java -javaagent:/opt/jolokia-jvm-17.2.jar 
