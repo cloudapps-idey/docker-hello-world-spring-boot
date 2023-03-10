@@ -1,4 +1,4 @@
- 
+
 #FROM registry.redhat.io/fuse7/fuse-java-openshift-rhel8:1.11
 FROM registry.redhat.io/ubi8/openjdk-11:1.15
 
@@ -9,6 +9,9 @@ COPY ./ /tmp/src/
 
 #USER root
 #RUN chmod -R "g=u" /tmp/src
+
+RUN chgrp -R 0 /tmp/src&& \
+    chmod -R g=u /tmp/src
 
 # Maven build
 USER 185
