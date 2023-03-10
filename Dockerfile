@@ -70,3 +70,4 @@ COPY settings.xml /home/jboss/.m2/settings.xml
 
 RUN /usr/local/s2i/assemble
 RUN rm -rf /tmp/src/target
+
